@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knee Recovery Exercise Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+            text-transform: uppercase;
+        }
+
+        .exercise-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .exercise-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .exercise-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .exercise-header.completed {
+            background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+        }
+
+        .exercise-title {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .exercise-frequency {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .expand-btn {
+            width: 24px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.3);
+            border: none;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.2s;
+        }
+
+        .expand-btn:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .exercise-content {
+            padding: 20px;
+            display: none;
+        }
+
+        .exercise-content.active {
+            display: block;
+        }
+
+        .video-section {
+            margin-bottom: 20px;
+        }
+
+        .video-label {
+            font-size: 12px;
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .video-link {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 10px;
+            transition: background 0.2s;
+        }
+
+        .video-link:hover {
+            background: #764ba2;
+        }
+
+        .instructions {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .instructions strong {
+            color: #667eea;
+        }
+
+        .exercise-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+            margin: 15px 0;
+        }
+
+        .detail-box {
+            background: #f9f9f9;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .detail-label {
+            font-size: 11px;
+            color: #999;
+            text-transform: uppercase;
+        }
+
+        .detail-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-top: 4px;
+        }
+
+        .tracking-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .tracking-title {
+            font-size: 13px;
+            color: #667eea;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #667eea;
+            margin-right: 8px;
+        }
+
+        .checkbox-item label {
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .checkbox-item input[type="checkbox"]:checked + label {
+            color: #667eea;
+            font-weight: 500;
+        }
+
+        .notes-area {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        .date-input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 13px;
+            width: 150px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #764ba2;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-danger {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #ff5252;
+        }
+
+        .circuit-section {
+            background: #fff9e6;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #ffc107;
+        }
+
+        .circuit-round {
+            margin-bottom: 15px;
+        }
+
+        .circuit-round:last-child {
+            margin-bottom: 0;
+        }
+
+        .round-title {
+            font-weight: 600;
+            color: #d4a200;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .round-items {
+            margin-left: 10px;
+            font-size: 13px;
+        }
+
+        .round-items li {
+            margin-bottom: 4px;
+            line-height: 1.4;
+        }
+
+        .pain-scale {
+            display: flex;
+            gap: 8px;
+            margin: 10px 0;
+            flex-wrap: wrap;
+        }
+
+        .pain-btn {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #ddd;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .pain-btn:hover {
+            border-color: #667eea;
+        }
+
+        .pain-btn.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 40px;
+            padding: 20px;
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 22px;
+            }
+
+            .exercise-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .expand-btn {
+                align-self: flex-end;
+                margin-top: 10px;
+            }
+
+            .stats-bar {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .exercise-details {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🦵 Knee Recovery Program</h1>
+            <p class="subtitle">Track your physio exercises & progress</p>
+        </header>
+
+        <div class="stats-bar">
+            <div class="stat-card">
+                <div class="stat-value" id="completion-today">0</div>
+                <div class="stat-label">Completed Today</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="completion-week">0</div>
+                <div class="stat-label">This Week</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="total-sessions">0</div>
+                <div class="stat-label">Total Sessions</div>
+            </div>
+        </div>
+
+        <!-- Exercise 1: Single Leg Exercise -->
+        <div class="exercise-card">
+            <div class="exercise-header" onclick="toggleExercise(this)">
+                <div>
+                    <div class="exercise-title">✅ Single Leg Exercise</div>
+                    <div class="exercise-frequency">Daily • 6 reps each side</div>
+                </div>
+                <button class="expand-btn">▼</button>
+            </div>
+            <div class="exercise-content">
+                <div class="video-section">
+                    <div class="video-label">📹 Video Demonstration</div>
+                    <a href="https://youtu.be/bb_YgWFu2cE?si=oUd251hAnk0TYdD9" target="_blank" class="video-link">Watch Video</a>
+                </div>
+
+                <div class="instructions">
+                    <strong>Instructions:</strong><br>
+                    • Perform 6 repetitions (right/left)<br>
+                    • Complete 2-3 sets<br>
+                    • <strong>Progression:</strong> Try single leg first (5-6 reps each side). If unable, do both legs together until you can do individually.
+                </div>
+
+                <div class="exercise-details">
+                    <div class="detail-box">
+                        <div class="detail-label">Sets</div>
+                        <div class="detail-value">2-3</div>
+                    </div>
+                    <div class="detail-box">
+                        <div class="detail-label">Reps</div>
+                        <div class="detail-value">6 each side</div>
+                    </div>
+                    <div class="detail-box">
+                        <div class="detail-label">Frequency</div>
+                        <div class="detail-value">Daily</div>
+                    </div>
+                </div>
+
+                <div class="tracking-section">
+                    <div class="tracking-title">Today's Tracking</div>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="ex1-set1">
+                            <label for="ex1-set1">Set 1</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="ex1-set2">
+                            <label for="ex1-set2">Set 2</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="ex1-set3">
+                            <label for="ex1-set3">Set 3 (optional)</label>
+                        </div>
+                    </div>
+                    <label style="display: block; font-size: 12px; color: #666; margin-bottom: 8px;">Notes / Single leg progress:</label>
+                    <textarea class="notes-area" id="ex1-notes" placeholder="e.g., Managed 4 reps single leg right side..."></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Exercise 2: Weekly Circuit -->
+        <div class="exercise-card">
+            <div class="exercise-header" onclick="toggleExercise(this)">
+                <div>
+                    <div class="exercise-title">⚡ Weekly Circuit</div>
+                    <div class="exercise-frequency">Once per week • 3 rounds</div>
+                </div>
+                <button class="expand-btn">▼</button>
+            </div>
+            <div class="exercise-content">
+                <div class="circuit-section">
+                    <div class="round-title">Complete 3 rounds of:</div>
+                    <div class="round-items">
+                        <li><strong>Bike</strong> - 3 minutes (2 min light pace + 1 min moderate effort)</li>
+                        <li><strong>Bear Crawl Steps</strong> - 20 steps (8 forward + 8 backward)</li>
+                        <li><strong>Lateral Hip Raises</strong> - 16-18 reps while walking as far as comfortable</li>
+                        <li><strong>Kettlebell Windmills</strong> - 8 reps</li>
+                        <li><strong>Lateral Bear Crawls</strong> - 20 steps (8 right + 8 left)</li>
+                    </div>
+                </div>
+
+                <div class="video-section">
+                    <div class="video-label">📹 Bear Crawl Videos</div>
+                    <a href="https://youtu.be/GcV2LB0qqnY?si=XpAAnMEhniEGOeUF" target="_blank" class="video-link">Bear Crawl Demo 1</a>
+                    <a href="https://youtu.be/MySQkUYO7O0?si=dheHHqoyW3hHqH5y" target="_blank" class="video-link">Bear Crawl Demo 2</a>
+                </div>
+
+                <div class="instructions">
+                    <strong>Bear Crawl Notes:</strong><br>
+                    • Only perform forward and lateral movements<br>
+                    • If you feel knee pain, stretch your legs more so weight stays on your arms
+                </div>
+
+                <div class="video-section">
+                    <div class="video-label">📹 Kettlebell Windmill</div>
+                    <a href="https://youtu.be/ITSmgn_BQgY?si=Tz-uYSMDZ-RjL3q-" target="_blank" class="video-link">Windmill Video</a>
+                </div>
+
+                <div class="instructions">
+                    <strong>Windmill Notes:</strong><br>
+                    • This works your whole body, not just the knee<br>
+                    • Rotate your body as much as you can
+                </div>
+
+                <div class="tracking-section">
+                    <div class="tracking-title">Today's Tracking</div>
+                    <label style="display: block; font-size: 12px; color: #666; margin-bottom: 8px;">Which round are you on?</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="circuit-round1">
+                            <label for="circuit-round1">Round 1 ✓</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="circuit-round2">
+                            <label for="circuit-round2">Round 2 ✓</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="circuit-round3">
+                            <label for="circuit-round3">Round 3 ✓</label>
+                        </div>
+                    </div>
+                    <label style="display: block; font-size: 12px; color: #666; margin-bottom: 8px;">Notes / How did it feel:</label>
+                    <textarea class="notes-area" id="circuit-notes" placeholder="e.g., Felt strong, knee pain was minimal..."></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Exercise 3: Lateral Leg Raise -->
+        <div class="exercise-card">
+            <div class="exercise-header" onclick="toggleExercise(this)">
+                <div>
+                    <div class="exercise-title">🦵 Lateral Leg Raise</div>
+                    <div class="exercise-frequency">Daily • 8-10 reps each side</div>
+                </div>
+                <button class="expand-btn">▼</button>
+            </div>
+            <div class="exercise-content">
+                <div class="video-section">
+                    <div class="video-label">📹 Video Demonstration</div>
+                    <a href="https://youtu.be/m0FOpMEgero?si=okTpcT470RGnAFkU" target="_blank" class="video-link">Watch Video</a>
+                </div>
+
+                <div class="instructions">
+                    <strong>Instructions:</strong><br>
+                    • 8-10 repetitions per side<br>
+                    • Complete 2 sets<br>
+                    • <strong>Tempo:</strong> 3 seconds on the way up + 4 seconds on the way down<br>
+                    • Pause and hold leg extended for 1-2 seconds at the top of each rep
+                </div>
+
+                <div class="exercise-details">
+                    <div class="detail-box">
+                        <div class="detail-label">Sets</div>
+                        <div class="detail-value">2</div>
+                    </div>
+                    <div class="detail-box">
+                        <div class="detail-label">Reps</div>
+                        <div class="detail-value">8-10 each side</div>
+                    </div>
+                    <div class="detail-box">
+                        <div class="detail-label">Tempo</div>
+                        <div class="detail-value">3s up / 4s down</div>
+                    </div>
+                </div>
+
+                <div class="tracking-section">
+                    <div class="tracking-title">Today's Tracking</div>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="ex3-right-set1">
+                            <label for="ex3-right-set1">Right Side Set 1</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="ex3-right-set2">
+                            <label for="ex3-right-set2">Right Side Set 2</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="ex3-left-set1">
+                            <label for="ex3-left-set1">Left Side Set 1</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="ex3-left-set2">
+                            <label for="ex3-left-set2">Left Side Set 2</label>
+                        </div>
+                    </div>
+                    <label style="display: block; font-size: 12px; color: #666; margin-bottom: 8px;">Reps completed & notes:</label>
+                    <textarea class="notes-area" id="ex3-notes" placeholder="e.g., Right: 10 reps, Left: 8 reps. Felt easier today..."></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Exercise 4: Heavy Weight Exercise -->
+        <div class="exercise-card">
+            <div class="exercise-header" onclick="toggleExercise(this)">
+                <div>
+                    <div class="exercise-title">💪 Heavy Weight Exercise</div>
+                    <div class="exercise-frequency">2-3x per week • 8 reps, 3-4 sets</div>
+                </div>
+                <button class="expand-btn">▼</button>
+            </div>
+            <div class="exercise-content">
+                <div class="video-section">
+                    <div class="video-label">📹 Video Demonstration</div>
+                    <a href="https://youtu.be/HGSowJYk-Hc?si=ptjckADHVyOnDbmO" target="_blank" class="video-link">Watch Video</a>
+                </div>
+
+                <div class="instructions">
+                    <strong>Key Instructions:</strong><br>
+                    • Perform 8 repetitions<br>
+                    • Complete 3-4 sets<br>
+                    • Start slow, then accelerate through the movement<br>
+                    • Work up to full range of motion<br>
+                    • <strong style="color: #ff6b6b;">⚠️ PAIN MANAGEMENT:</strong> Keep pain below 4/10<br>
+                    • If pain exceeds 4/10: reduce load first, then reduce amplitude<br>
+                    • Rest 45 seconds between sets
+                </div>
+
+                <div class="exercise-details">
+                    <div class="detail-box">
+                        <div class="detail-label">Sets</div>
+                        <div class="detail-value">3-4</div>
+                    </div>
+                    <div class="detail-box">
+                        <div class="detail-label">Reps</div>
+                        <div class="detail-value">8</div>
+                    </div>
+                    <div class="detail-box">
+                        <div class="detail-label">Rest</div>
+                        <div class="detail-value">45 sec</div>
+                    </div>
+                </div>
+
+                <div class="tracking-section">
+                    <div class="tracking-title">Detailed Tracking</div>
+                    <label style="display: block; font-size: 12px; color: #666; margin-bottom: 8px;">Date:</label>
+                    <input type="date" class="date-input" id="heavy-date">
+                    
+                    <div style="margin-top: 15px;">
+                        <label style="display: block; font-size: 12px; color: #666; margin-bottom: 8px;">Set 1</label>
+                        <input type="text" class="notes-area" id="heavy-set1" placeholder="e.g., Weight: 20kg, Reps: 8, Pain level: 2/10, Notes: Felt good">
+                    </div>
+
+                    <div style="margin-top: 10px;">
+                        <label style="display: block; font-size: 12px; color: #666; margin-bottom: 8px;">Set 2</label>
+                        <input type="text" class="notes-area" id="heavy-set2" placeholder="e.g., Weight: 20kg, Reps: 8, Pain level: 3/10">
+                    </div>
+
+                    <div style="margin-top: 10px;">
+                        <label style="display: block; font-size: 12px; color: #666; margin-bottom: 8px;">Set 3</label>
+                        <input type="text" class="notes-area" id="heavy-set3" placeholder="e.g., Weight: 20kg, Reps: 7, Pain level: 3/10">
+                    </div>
+
+                    <div style="margin-top: 10px;">
+                        <label style="display: block; font-size: 12px; color: #666; margin-bottom: 8px;">Set 4 (if doing)</label>
+                        <input type="text" class="notes-area" id="heavy-set4" placeholder="Optional - e.g., Weight: 18kg, Reps: 8, Pain level: 2/10">
+                    </div>
+
+                    <div style="margin-top: 15px;">
+                        <label style="display: block; font-size: 12px; color: #666; margin-bottom: 8px;">Overall Pain Level During Exercise (0-10)</label>
+                        <div class="pain-scale" id="pain-scale">
+                            <button class="pain-btn" data-pain="0">0</button>
+                            <button class="pain-btn" data-pain="1">1</button>
+                            <button class="pain-btn" data-pain="2">2</button>
+                            <button class="pain-btn" data-pain="3">3</button>
+                            <button class="pain-btn" data-pain="4">4</button>
+                            <button class="pain-btn" data-pain="5">5</button>
+                            <button class="pain-btn" data-pain="6">6</button>
+                            <button class="pain-btn" data-pain="7">7</button>
+                            <button class="pain-btn" data-pain="8">8</button>
+                            <button class="pain-btn" data-pain="9">9</button>
+                            <button class="pain-btn" data-pain="10">10</button>
+                        </div>
+                    </div>
+
+                    <label style="display: block; font-size: 12px; color: #666; margin-top: 15px; margin-bottom: 8px;">General Notes:</label>
+                    <textarea class="notes-area" id="heavy-notes" placeholder="How challenging was this compared to last session? Any observations?"></textarea>
+
+                    <div class="button-group">
+                        <button class="btn btn-primary" onclick="saveHeavyWorkout()">Save Session</button>
+                        <button class="btn btn-secondary" onclick="clearHeavyForm()">Clear</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>💪 Follow your physio's instructions. If pain increases beyond the recommended level, stop and rest.</p>
+            <p>Last updated: Today • Your progress is saved locally</p>
+        </div>
+    </div>
+
+    <script>
+        // Toggle exercise sections
+        function toggleExercise(header) {
+            const content = header.nextElementSibling;
+            const btn = header.querySelector('.expand-btn');
+            
+            content.classList.toggle('active');
+            header.classList.toggle('completed');
+            btn.textContent = content.classList.contains('active') ? '▲' : '▼';
+        }
+
+        // Pain scale selection
+        document.querySelectorAll('.pain-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.pain-btn').forEach(b => b.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        // Save heavy workout
+        function saveHeavyWorkout() {
+            const date = document.getElementById('heavy-date').value;
+            const sets = [
+                document.getElementById('heavy-set1').value,
+                document.getElementById('heavy-set2').value,
+                document.getElementById('heavy-set3').value,
+                document.getElementById('heavy-set4').value
+            ];
+            const painLevel = document.querySelector('.pain-btn.selected')?.dataset.pain;
+            const notes = document.getElementById('heavy-notes').value;
+
+            if (!date) {
+                alert('Please select a date');
+                return;
+            }
+
+            const session = {
+                date,
+                sets: sets.filter(s => s),
+                painLevel,
+                notes
+            };
+
+            let sessions = JSON.parse(localStorage.getItem('heavySessions')) || [];
+            sessions.push(session);
+            localStorage.setItem('heavySessions', JSON.stringify(sessions));
+
+            alert('✅ Session saved!');
+            clearHeavyForm();
+            updateStats();
+        }
+
+        function clearHeavyForm() {
+            document.getElementById('heavy-date').value = '';
+            document.querySelectorAll('.pain-btn').forEach(b => b.classList.remove('selected'));
+            document.getElementById('heavy-set1').value = '';
+            document.getElementById('heavy-set2').value = '';
+            document.getElementById('heavy-set3').value = '';
+            document.getElementById('heavy-set4').value = '';
+            document.getElementById('heavy-notes').value = '';
+        }
+
+        // Update statistics
+        function updateStats() {
+            const sessions = JSON.parse(localStorage.getItem('heavySessions')) || [];
+            const today = new Date().toISOString().split('T')[0];
+            
+            const todaySessions = sessions.filter(s => s.date === today);
+            document.getElementById('total-sessions').textContent = sessions.length;
+            document.getElementById('completion-today').textContent = todaySessions.length;
+            
+            // Count this week
+            const weekAgo = new Date();
+            weekAgo.setDate(weekAgo.getDate() - 7);
+            const weekSessions = sessions.filter(s => s.date >= weekAgo.toISOString().split('T')[0]);
+            document.getElementById('completion-week').textContent = weekSessions.length;
+        }
+
+        // Initialize
+        window.addEventListener('load', updateStats);
+    </script>
+</body>
+</html>
